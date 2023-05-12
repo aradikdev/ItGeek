@@ -24,4 +24,20 @@ public class AppDbContext : DbContext
 	public DbSet<Tag> Tags { get; set; }
 	public DbSet<User> Users { get; set; }
 	public DbSet<UserProfile> UserProfiles { get; set; }
+
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
+
+		modelBuilder.Entity<Menu>().HasData(new Menu
+		{
+			Name = "Меню в шапке",
+		});
+		modelBuilder.Entity<Menu>().HasData(new Menu
+		{
+			Name = "Меню в подвале",
+		});
+
+	}
 }
