@@ -2,5 +2,5 @@
 
 public class Role : BaseEntity
 {
-	public string Name { get; set; }
+	public Enum RoleName { get; set; }
 }

@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ItGeek.DAL.Enums;
 
-public enum SocialName
+public enum RoleName
 {
-	Facebook = 1,
-	Twitter = 2,
-	YouTube = 3,
-	Instagram = 4
+	SuperAdmin = 1,
+	Admin = 2,
+	Moderator = 3,
+	Basic= 4
 }
