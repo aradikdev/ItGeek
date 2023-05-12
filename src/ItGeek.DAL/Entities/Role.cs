@@ -1,6 +1,8 @@
-﻿namespace ItGeek.DAL.Entities;
+﻿using ItGeek.DAL.Enums;
+
+namespace ItGeek.DAL.Entities;
 
 public class Role : BaseEntity
 {
-	public Enum RoleName { get; set; }
+	public RoleName RoleName { get; set; }
 }
