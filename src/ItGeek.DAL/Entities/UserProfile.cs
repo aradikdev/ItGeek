@@ -1,6 +1,6 @@
 ﻿namespace ItGeek.DAL.Entities;
 
-public class UserProfile
+public class UserProfile : BaseEntity
 {
     public int UserId { get; set; }
     public User User { get; set; }
