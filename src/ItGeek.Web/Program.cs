@@ -1,8 +1,6 @@
 ﻿using ItGeek.BLL;
 using ItGeek.DAL.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using ItGeek.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
