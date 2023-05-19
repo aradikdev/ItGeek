@@ -24,6 +24,7 @@ public class UnitOfWork
     private MenuRepository _menuRepository;
 	private MenuItemRepository _menuItemRepository;
     private AuthorsSocialRepository _authorsSocialRepository;
+    private PostContentRepository _postContentRepository;
 
     public AuthorRepository AuthorRepository
 	{
@@ -144,6 +145,17 @@ public class UnitOfWork
                 _userProfileRepository = new UserProfileRepository(_db);
 			}
 			return _userProfileRepository;
+		}
+	}
+	public PostContentRepository PostContentRepository
+    {
+        get
+        {
+			if (_postContentRepository == null)
+			{
+                _postContentRepository = new PostContentRepository(_db);
+			}
+			return _postContentRepository;
 		}
 	}
 }
