@@ -12,27 +12,31 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class CommentsController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public CommentsController(UnitOfWork uow)
         {
             _uow = uow;
         }
 
-        // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.CommentRepository.ListAllAsync());
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            return View(await _uow.CommentRepository.GetByIDAsync(id));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            Comment comment = await _uow.CommentRepository.GetByIDAsync(id);
+            if (comment != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.CommentRepository.DeleteAsync(comment);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +46,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(Comment comment)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.CommentRepository.InsertAsync(comment);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(comment);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            Comment comment = await _uow.CommentRepository.GetByIDAsync(id);
+            if (comment == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(comment);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(Comment comment)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.CommentRepository.UpdateAsync(comment);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(comment);
         }
     }
 }

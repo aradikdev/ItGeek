@@ -12,27 +12,31 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class CategoriesController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public CategoriesController(UnitOfWork uow)
         {
             _uow = uow;
         }
 
-        // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.CategoryRepository.ListAllAsync());
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            return View(await _uow.CategoryRepository.GetByIDAsync(id));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            Category category = await _uow.CategoryRepository.GetByIDAsync(id);
+            if (category != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.CategoryRepository.DeleteAsync(category);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +46,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(Category category)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.CategoryRepository.InsertAsync(category);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(category);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            Category category = await _uow.CategoryRepository.GetByIDAsync(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(category);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(Category category)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.CategoryRepository.UpdateAsync(category);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(category);
         }
     }
 }

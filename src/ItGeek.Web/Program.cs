@@ -1,8 +1,12 @@
-using ItGeek.BLL;
+﻿using ItGeek.BLL;
 using ItGeek.DAL.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ItGeek.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ItGeekWebContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ItGeekWebContext") ?? throw new InvalidOperationException("Connection string 'ItGeekWebContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

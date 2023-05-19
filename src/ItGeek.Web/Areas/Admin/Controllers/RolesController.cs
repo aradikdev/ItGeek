@@ -12,27 +12,31 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class RolesController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public RolesController(UnitOfWork uow)
         {
             _uow = uow;
         }
 
-        // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.RoleRepository.ListAllAsync());
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            return View(await _uow.RoleRepository.GetByIDAsync(id));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            Role role = await _uow.RoleRepository.GetByIDAsync(id);
+            if (role != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.RoleRepository.DeleteAsync(role);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +46,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(Role role)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.RoleRepository.InsertAsync(role);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(role);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            Role role = await _uow.RoleRepository.GetByIDAsync(id);
+            if (role == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(role);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(Role role)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.RoleRepository.UpdateAsync(role);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(role);
         }
     }
 }

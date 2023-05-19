@@ -12,27 +12,31 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class MenusController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public MenusController(UnitOfWork uow)
         {
             _uow = uow;
         }
 
-        // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.MenuRepository.ListAllAsync());
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            return View(await _uow.MenuRepository.GetByIDAsync(id));
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            Menu menu = await _uow.MenuRepository.GetByIDAsync(id);
+            if (menu != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.MenuRepository.DeleteAsync(menu);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +46,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(Menu menu)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.MenuRepository.InsertAsync(menu);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(menu);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            Menu menu = await _uow.MenuRepository.GetByIDAsync(id);
+            if (menu == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(menu);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(Menu menu)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.MenuRepository.UpdateAsync(menu);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(menu);
         }
     }
 }

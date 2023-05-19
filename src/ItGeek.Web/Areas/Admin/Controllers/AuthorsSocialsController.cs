@@ -12,11 +12,11 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class AuthorsSocialsController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public AuthorsSocialsController(UnitOfWork uow)
         {
             _uow = uow;
         }
@@ -24,15 +24,15 @@ namespace ItGeek.Web.Areas.Admin.Controllers
         // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.AuthorsSocialRepository.ListAllAsync());
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            AuthorsSocial authorsSocial = await _uow.AuthorsSocialRepository.GetByIDAsync(id);
+            if (authorsSocial != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.AuthorsSocialRepository.DeleteAsync(authorsSocial);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +42,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(AuthorsSocial authorsSocial)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.AuthorsSocialRepository.InsertAsync(authorsSocial);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(authorsSocial);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            AuthorsSocial authorsSocial = await _uow.AuthorsSocialRepository.GetByIDAsync(id);
+            if (authorsSocial == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(authorsSocial);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(AuthorsSocial authorsSocial)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.AuthorsSocialRepository.UpdateAsync(authorsSocial);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(authorsSocial);
         }
     }
 }

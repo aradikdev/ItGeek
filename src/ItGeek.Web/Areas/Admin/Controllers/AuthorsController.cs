@@ -12,11 +12,11 @@ using ItGeek.BLL;
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class TagsController : Controller
+    public class AuthorsController : Controller
     {
         private readonly UnitOfWork _uow;
 
-        public TagsController(UnitOfWork uow)
+        public AuthorsController(UnitOfWork uow)
         {
             _uow = uow;
         }
@@ -24,15 +24,15 @@ namespace ItGeek.Web.Areas.Admin.Controllers
         // GET: Admin/Tags
         public async Task<IActionResult> Index()
         {
-            return View(await _uow.TagRepository.ListAllAsync());
+            return View(await _uow.AuthorRepository.ListAllAsync());
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag != null)
+            Author author = await _uow.AuthorRepository.GetByIDAsync(id);
+            if (author != null)
             {
-                await _uow.TagRepository.DeleteAsync(tag);
+                await _uow.AuthorRepository.DeleteAsync(author);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -42,34 +42,34 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(Tag tag)
+        public async Task<IActionResult> Create(Author author)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.InsertAsync(tag);
+                await _uow.AuthorRepository.InsertAsync(author);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(author);
         }
         [HttpGet]
         public async Task<IActionResult> Update(int id)
         {
-            Tag tag = await _uow.TagRepository.GetByIDAsync(id);
-            if (tag == null)
+            Author author = await _uow.AuthorRepository.GetByIDAsync(id);
+            if (author == null)
             {
                 return NotFound();
             }
-            return View(tag);
+            return View(author);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Tag tag)
+        public async Task<IActionResult> Update(Author author)
         {
             if (ModelState.IsValid)
             {
-                await _uow.TagRepository.UpdateAsync(tag);
+                await _uow.AuthorRepository.UpdateAsync(author);
                 return RedirectToAction(nameof(Index));
             }
-            return View(tag);
+            return View(author);
         }
     }
 }
