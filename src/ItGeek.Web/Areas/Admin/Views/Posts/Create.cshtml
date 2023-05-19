@@ -13,7 +13,6 @@
     <div class="col-md-12">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
             <div class="row">
                 <div class="col-6">
                     <div class="form-group">
@@ -32,7 +31,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="PostBody" class="control-label"></label>
-                <textarea asp-for="PostBody" class="form-control"></textarea>
+                <textarea id="myeditor" asp-for="PostBody" class="form-control" rows="10"></textarea>
                 <span asp-validation-for="PostBody" class="text-danger"></span>
             </div>
 
