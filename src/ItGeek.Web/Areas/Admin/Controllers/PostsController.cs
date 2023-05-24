@@ -17,10 +17,12 @@ namespace ItGeek.Web.Areas.Admin.Controllers
     public class PostsController : Controller
     {
         private readonly UnitOfWork _uow;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public PostsController(UnitOfWork uow)
+        public PostsController(UnitOfWork uow, IWebHostEnvironment hostEnvironment)
         {
             _uow = uow;
+            _hostEnvironment = hostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -35,6 +37,7 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                 PostContent onePostsContent = allPostsContent.First(x=>x.PostId == onePost.Id);
                 post.Add(new PostViewModel()
                     {
+                        Id = onePost.Id,
                         Slug = onePost.Slug,
                         IsDeleted = onePost.IsDeleted,
                         Title = onePostsContent.Title,
@@ -50,11 +53,30 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            return View(await _uow.PostRepository.GetByIDAsync(id));
+            Post post = await _uow.PostRepository.GetByIDAsync(id);
+            PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(id);
+
+            PostViewModel postViewModel = new PostViewModel()
+            {
+                Id = id,
+                Slug = post.Slug,
+                IsDeleted = post.IsDeleted,
+                Title = postContent.Title,
+                PostBody = postContent.PostBody,
+                PostImage = postContent.PostImage,
+                CommentsClosed = postContent.CommentsClosed
+            };
+
+            return View(postViewModel);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
+            PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(id);
+            if (postContent != null)
+            {
+                await _uow.PostContentRepository.DeleteAsync(postContent);
+            }
             Post post = await _uow.PostRepository.GetByIDAsync(id);
             if (post != null)
             {
@@ -72,6 +94,8 @@ namespace ItGeek.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                postViewModel.PostImage = await ProcessUploadFile(postViewModel);
+
                 Post post = new Post()
                 {
                     Id = postViewModel.Id,
@@ -104,17 +128,73 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            return View(post);
+            PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(id);
+
+            PostViewModel postViewModel = new PostViewModel()
+            {
+                Id = id,
+                Slug = post.Slug,
+                IsDeleted = post.IsDeleted,
+                Title = postContent.Title,
+                PostBody = postContent.PostBody,
+                PostImage = postContent.PostImage,
+                CommentsClosed = postContent.CommentsClosed,
+            };
+            return View(postViewModel);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(Post post)
+        public async Task<IActionResult> Update(PostViewModel postViewModel)
         {
             if (ModelState.IsValid)
             {
+                Post post = await _uow.PostRepository.GetByIDAsync(postViewModel.Id);
+
+                post.Slug = postViewModel.Slug;
+                post.IsDeleted = postViewModel.IsDeleted;
+                post.EditedAt = DateTime.Now;
+                //TODO: post.EditedBy = User;
+
                 await _uow.PostRepository.UpdateAsync(post);
+
+                // Получим Пост контент
+                PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(postViewModel.Id);
+
+                // Заполняем Пост контент из формы
+                postContent.Title = postViewModel.Title;
+                postContent.PostBody = postViewModel.PostBody;
+                postContent.CommentsClosed = postViewModel.CommentsClosed;
+
+                // Получили новую картинку 
+                if (postViewModel.ImageFile != null)
+                {
+                    string newImage = await ProcessUploadFile(postViewModel);
+                    postContent.PostImage = newImage;
+
+                    //TODO удалить старую картинку
+                }
+                await _uow.PostContentRepository.UpdateAsync(postContent);
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            return View(postViewModel);
+        }
+
+        protected async Task<string> ProcessUploadFile(PostViewModel postViewModel)
+        {
+            string uniqueFileName = "";
+            if (postViewModel.ImageFile != null)
+            {
+                string wwwRootPath = _hostEnvironment.WebRootPath;
+                string fileName = Path.GetFileNameWithoutExtension(postViewModel.ImageFile.FileName);
+                string fileExtension = Path.GetExtension(postViewModel.ImageFile.FileName);
+                uniqueFileName = fileName + DateTime.Now.ToString("yymmddssfff") + fileExtension;
+                string path = Path.Combine(wwwRootPath + "/uploads/", uniqueFileName);
+                using(var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await postViewModel.ImageFile.CopyToAsync(fileStream);
+                }
+            }
+            return uniqueFileName;
         }
     }
 }
