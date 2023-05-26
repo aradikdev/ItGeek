@@ -18,7 +18,8 @@ namespace ItGeek.Web.Controllers
 			return View();
 		}
 
-        public async Task<IActionResult> Post(string categorySlug, string postSlug)
+		//[HttpGet("{categorySlug}/{postSlug}")]
+		public async Task<IActionResult> Post(string categorySlug, string postSlug)
         {
             Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
             Category category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);

@@ -23,10 +23,12 @@ public class UnitOfWork
 	private UserProfileRepository _userProfileRepository;
     private MenuRepository _menuRepository;
 	private MenuItemRepository _menuItemRepository;
-    private AuthorsSocialRepository _authorsSocialRepository;
-    private PostContentRepository _postContentRepository;
+	private AuthorsSocialRepository _authorsSocialRepository;
+	private PostContentRepository _postContentRepository;
+	private PostCategoryRepository _postCategoryRepository;
+	private PostAuthorRepository _postAuthorRepository;
 
-    public AuthorRepository AuthorRepository
+	public AuthorRepository AuthorRepository
 	{
 		get
 		{
@@ -156,6 +158,28 @@ public class UnitOfWork
                 _postContentRepository = new PostContentRepository(_db);
 			}
 			return _postContentRepository;
+		}
+	}
+	public PostCategoryRepository PostCategoryRepository
+	{
+		get
+		{
+			if (_postCategoryRepository == null)
+			{
+				_postCategoryRepository = new PostCategoryRepository(_db);
+			}
+			return _postCategoryRepository;
+		}
+	}
+	public PostAuthorRepository PostAuthorRepository
+	{
+		get
+		{
+			if (_postAuthorRepository == null)
+			{
+				_postAuthorRepository = new PostAuthorRepository(_db);
+			}
+			return _postAuthorRepository;
 		}
 	}
 }
