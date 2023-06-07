@@ -10,6 +10,7 @@ using ItGeek.BLL;
 using ItGeek.Web.Areas.Admin.ViewModels;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http.HttpResults;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
@@ -124,7 +125,23 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 				await _uow.PostRepository.InsertAsync(post);
 				await _uow.PostContentRepository.InsertAsync(postContent);
 
-				foreach (int catId in postViewModel.CategoryId)
+                string[] tagsNames = postViewModel.TagIds.Split(new char[] { ',' });
+
+                foreach (string tagName in tagsNames)
+                {
+                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName);
+                    if (tagId != 0)
+                    {
+                        PostTag postTag = new PostTag()
+                        {
+                            PostId = post.Id,
+                            TagId = tagId
+                        };
+                        await _uow.PostTagRepository.InsertAsync(postTag);
+                    }
+                }
+
+                foreach (int catId in postViewModel.CategoryId)
                 {
                     PostCategory postCategory = new PostCategory()
 				    {    
@@ -162,6 +179,7 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             }
             PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(id);
             
+            string tagNames = await _uow.PostTagRepository.GetByPostIDAsync(id);
 
             PostViewModel postViewModel = new PostViewModel()
             {
@@ -172,7 +190,11 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                 PostBody = postContent.PostBody,
                 PostImage = postContent.PostImage,
                 CommentsClosed = postContent.CommentsClosed,
+                TagIds = tagNames
             };
+
+
+
 			ViewBag.Authors = await _uow.AuthorRepository.ListAllAsync();
 			ViewBag.Categories = await _uow.CategoryRepository.ListAllAsync();
 			ViewBag.PostCategories = await _uow.PostCategoryRepository.ListByPostIdAsync(id);
@@ -213,6 +235,31 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                     //TODO удалить старую картинку
                 }
                 await _uow.PostContentRepository.UpdateAsync(postContent);
+
+                //qwe, qweret, qwe
+                string[] tagsNames = postViewModel.TagIds.Split(new char[] { ',' });
+                // [qwe, qweret, qwe]
+
+                foreach (string tagName in tagsNames)
+                {
+                    //tagName = qwe
+                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName);
+                    // tagId = 5
+                    if (tagId != 0)
+                    {
+                        bool havePostTag = await _uow.PostTagRepository.GetByTagIdAsync(post.Id, tagId);
+                        if(!havePostTag)
+                        {
+                            PostTag postTag = new PostTag()
+                            {
+                                PostId = post.Id,
+                                TagId = tagId
+                            };
+                            await _uow.PostTagRepository.InsertAsync(postTag);
+                        }
+                    }
+                }
+
 
                 return RedirectToAction(nameof(Index));
             }

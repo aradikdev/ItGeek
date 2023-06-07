@@ -10,7 +10,7 @@ namespace ItGeek.Web.Areas.Admin.ViewModels
         //from Post
         [Required]
         [StringLength(250)]
-        [Display(Name ="Ссылка")]
+        [Display(Name = "Ссылка")]
         public string Slug { get; set; }
         [Display(Name = "Черновик")]
         public bool IsDeleted { get; set; } = false;
@@ -23,7 +23,7 @@ namespace ItGeek.Web.Areas.Admin.ViewModels
         [Required]
         [Display(Name = "Текст новости")]
         public string PostBody { get; set; }
-        
+
         [Display(Name = "Изображение")]
         public string? PostImage { get; set; }
         [Display(Name = "Открыть комментарии")]
@@ -33,16 +33,16 @@ namespace ItGeek.Web.Areas.Admin.ViewModels
         [Display(Name = "Картинка")]
         public IFormFile? ImageFile { get; set; }
 
-		[Display(Name = "Категория")]
-		public int[] CategoryId { get; set; }
+        [Display(Name = "Категория")]
+        public int[] CategoryId { get; set; }
 
 
-		[Display(Name = "Автор")]
-		public int[] AuthorId { get; set; }
+        [Display(Name = "Автор")]
+        public int[] AuthorId { get; set; }
 
 
         [Display(Name = "Теги")]
-        public string[]? TagIds { get; set; }
+        public string? TagIds { get; set; }
 
     }
 }
