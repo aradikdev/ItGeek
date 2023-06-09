@@ -50,6 +50,7 @@ namespace ItGeek.Web.Controllers
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, user.RoleId.ToString())
             };
+            Console.WriteLine(user.RoleId.ToString());
             ClaimsIdentity id = new ClaimsIdentity(
                 claims,
                 "ApplicationCookie",

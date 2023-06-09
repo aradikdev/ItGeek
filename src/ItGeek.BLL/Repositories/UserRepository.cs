@@ -16,7 +16,7 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
 
 	public async Task<User?> ValidateLoginPasswordAsync(string email, string password)
     {
-        User user = await _db.Users.Include(x=>x.Role).Where(x => x.Email == email).FirstAsync();
+        User user = await _db.Users.Include(x=>x.Role).Where(x => x.Email == email).FirstOrDefaultAsync();
         if (user == null)
         {
             return null;
