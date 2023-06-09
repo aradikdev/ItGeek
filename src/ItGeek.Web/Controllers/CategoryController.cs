@@ -13,30 +13,20 @@ namespace ItGeek.Web.Controllers
         {
             _uow = uow;
         }
-        public IActionResult Index()
+        [HttpGet("[Controller]/{categorySlug}")]
+        public async Task<IActionResult> Index(string categorySlug)
 		{
-			return View();
+			Category category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
+			return View(category);
 		}
 
-		//[HttpGet("{categorySlug}/{postSlug}")]
+		[HttpGet("[Controller]/{categorySlug}/{postSlug}")]
 		public async Task<IActionResult> Post(string categorySlug, string postSlug)
         {
-            Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
+			Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
             Category category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
-			List<Post> allPosts = await _uow.PostRepository.ListByCategoryIdAsync(category.Id);
-
-			List<PostContent> allPostContent = await _uow.PostContentRepository.ListByCategoryIdAsync(category.Id);
-
-			PostContentViewModel postContent = new PostContentViewModel()
-            {
-                category = category,
-				post = postOne,
-                postContent = await _uow.PostContentRepository.GetByPostIDAsync(postOne.Id),
-                posts = allPosts,
-                postContents = allPostContent
-			};
-
-            return View(postContent);
+			
+			return View();
         }
     }
 }

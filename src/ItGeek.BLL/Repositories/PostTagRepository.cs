@@ -45,4 +45,14 @@ public class PostTagRepository : GenericRepositoryAsync<PostTag>, IPostTagReposi
 		}
 		return false;
     }
+    public async Task DeleteByPostIdAsync(int postId)
+    {
+		List<PostTag> postTags = await _db.PostTags.Where(x => x.PostId == postId).ToListAsync();
+
+		foreach (PostTag item in postTags)
+		{
+            _db.PostTags.Remove(item);
+            await _db.SaveChangesAsync();
+		}
+    }
 }

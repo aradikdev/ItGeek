@@ -129,7 +129,7 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 
                 foreach (string tagName in tagsNames)
                 {
-                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName);
+                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName.Trim());
                     if (tagId != 0)
                     {
                         PostTag postTag = new PostTag()
@@ -236,30 +236,39 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                 }
                 await _uow.PostContentRepository.UpdateAsync(postContent);
 
-                //qwe, qweret, qwe
+                //qwe
                 string[] tagsNames = postViewModel.TagIds.Split(new char[] { ',' });
                 // [qwe, qweret, qwe]
 
+                await _uow.PostTagRepository.DeleteByPostIdAsync(post.Id);
                 foreach (string tagName in tagsNames)
                 {
-                    //tagName = qwe
-                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName);
-                    // tagId = 5
-                    if (tagId != 0)
+                    Tag tag = await _uow.TagRepository.GetOneTagByNameAsync(tagName);
+                    if(tag != null)
                     {
-                        bool havePostTag = await _uow.PostTagRepository.GetByTagIdAsync(post.Id, tagId);
-                        if(!havePostTag)
+                        PostTag postTag = new PostTag()
                         {
-                            PostTag postTag = new PostTag()
-                            {
-                                PostId = post.Id,
-                                TagId = tagId
-                            };
-                            await _uow.PostTagRepository.InsertAsync(postTag);
-                        }
+                            PostId = post.Id,
+                            TagId = tag.Id
+                        };
+                        await _uow.PostTagRepository.InsertAsync(postTag);
                     }
                 }
 
+                await _uow.PostAuthorRepository.DeleteByPostIdAsync(post.Id);
+                foreach (int authId in postViewModel.AuthorId)
+                {
+                    Author haveAuthor = await _uow.AuthorRepository.GetByIDAsync(authId);
+                    if (haveAuthor != null)
+                    {
+                        PostAuthor postAuthor = new PostAuthor()
+                        {
+                            PostId = post.Id,
+                            AuthorId = authId
+                        };
+                        await _uow.PostAuthorRepository.InsertAsync(postAuthor);
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }

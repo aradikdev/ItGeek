@@ -33,22 +33,26 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Post>()
                    .HasMany(e => e.Tags)
-                   .WithMany(e => e.Posts);
+                   .WithMany(e => e.Posts)
+				   .UsingEntity<PostTag>();
 
-        modelBuilder.Entity<Post>()
+		modelBuilder.Entity<Post>()
                    .HasMany(e => e.Authors)
-                   .WithMany(e => e.Posts);
+                   .WithMany(e => e.Posts)
+                   .UsingEntity<PostAuthor>();
 
         modelBuilder.Entity<Post>()
                    .HasMany(e => e.Categories)
-                   .WithMany(e => e.Posts);
+                   .WithMany(e => e.Posts)
+				   .UsingEntity<PostCategory>();
 
-        modelBuilder.Entity<Post>()
+		modelBuilder.Entity<Post>()
                    .HasMany(e => e.Comments)
-                   .WithMany(e => e.Posts);
+                   .WithMany(e => e.Posts)
+                   .UsingEntity<PostComment>();
 
 
-        modelBuilder.Entity<Menu>().HasData(new Menu
+		modelBuilder.Entity<Menu>().HasData(new Menu
         {
             Id = 1,
             Name = "Меню в шапке",
