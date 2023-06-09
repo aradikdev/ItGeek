@@ -25,7 +25,6 @@ namespace ItGeek.Web.Controllers
         {
 			Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
             ViewBag.Category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
-			
 			return View(postOne);
         }
     }
