@@ -50,7 +50,6 @@ namespace ItGeek.Web.Controllers
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, user.RoleId.ToString())
             };
-            Console.WriteLine(user.RoleId.ToString());
             ClaimsIdentity id = new ClaimsIdentity(
                 claims,
                 "ApplicationCookie",
@@ -62,7 +61,7 @@ namespace ItGeek.Web.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(1)
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
                 }
             );
         }
