@@ -18,4 +18,9 @@ public class CategoryRepository : GenericRepositoryAsync<Category>, ICategoryRep
     {
         return await _db.Categories.Include(x => x.Posts).ThenInclude(i => i.PostContents).Where(x => x.Slug == slug).FirstAsync();
     }
+    public async Task<int> RandomCatId()
+    {
+        Category? category = await _db.Categories.OrderBy(x => Guid.NewGuid()).FirstOrDefaultAsync(); return category != null ? category.Id : 1;
+    }
+
 }

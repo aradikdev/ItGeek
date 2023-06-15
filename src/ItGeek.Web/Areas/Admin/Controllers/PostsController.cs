@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿using ItGeek.BLL;
 using ItGeek.DAL.Entities;
-using ItGeek.BLL;
 using ItGeek.Web.Areas.Admin.ViewModels;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
-using static System.Net.Mime.MediaTypeNames;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
@@ -311,5 +303,59 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 
             return Json(res);
         }
+
+        public async Task<IActionResult> GenerateRandomPosts(int count = 1)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Post post = new Post();
+                PostContent content = new PostContent();
+                PostCategory postCat = new PostCategory();
+                PostAuthor postAuthor = new PostAuthor();
+                PostTag postTag = new PostTag();
+                Random random = new Random();
+
+                post.Slug = await GetRandomWords(1); post.CreatedAt = DateTime.Now;
+                //post.CreatedBy = 
+                await _uow.PostRepository.InsertAsync(post);
+
+                content.Title = await GetRandomWords(3);
+                content.PostBody = await GetRandomWords(50);
+                content.PostImage = random.Next(1, 32).ToString() + ".jpg"; 
+                // надо добавить в папку uploads изображения с названием "1.jpg", "2.jpg"  и так далее по порядку. Количество поставить в random.Next (у меня 32)
+                content.PostId = post.Id; 
+
+                postCat.PostId = post.Id;
+                postCat.CategoryId = await _uow.CategoryRepository.RandomCatId();
+
+                postAuthor.PostId = post.Id;
+                postAuthor.AuthorId = await _uow.PostAuthorRepository.RandomAuthorId();
+
+                postTag.PostId = post.Id;
+                postTag.TagId = await _uow.PostTagRepository.RandomTagId();
+
+                await _uow.PostAuthorRepository.InsertAsync(postAuthor);
+                await _uow.PostCategoryRepository.InsertAsync(postCat); 
+                await _uow.PostContentRepository.InsertAsync(content); 
+                await _uow.PostTagRepository.InsertAsync(postTag);
+            }
+            return RedirectToAction("Index");
+        }
+        static async Task<string> GetRandomWords(int count)
+        {
+            string[] words = new string[count]; string space = count > 1 ? " " : "";
+            using (HttpClient client = new HttpClient())
+            {
+                string apiUrl = $"https://random-word-api.herokuapp.com/word?number={count}";
+                HttpResponseMessage response = await client.GetAsync(apiUrl); if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync(); words = JsonSerializer.Deserialize<string[]>(jsonResponse);
+                }
+                else
+                    throw new Exception("Failed to retrieve random words.");
+            }
+            return string.Join(space, words);
+        }
+
     }
 }

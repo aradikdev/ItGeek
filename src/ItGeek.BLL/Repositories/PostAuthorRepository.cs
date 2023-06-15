@@ -37,5 +37,9 @@ public class PostAuthorRepository : GenericRepositoryAsync<PostAuthor>, IPostAut
             await _db.SaveChangesAsync();
         }
     }
-    
+    public async Task<int> RandomAuthorId()
+    {
+        Author? author = await _db.Authors.OrderBy(x => Guid.NewGuid()).FirstOrDefaultAsync(); return author != null ? author.Id : 1;
+    }
+
 }
