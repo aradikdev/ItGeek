@@ -13,6 +13,7 @@ public class LastsViewComponent : ViewComponent
     }
     public async Task<IViewComponentResult> InvokeAsync()
     {
-        return View(await _uow.PostRepository.GetLastAsync(6));
+        var qwe = await _uow.PostRepository.GetLastAsync(6);
+        return View(qwe);
     }
 }
