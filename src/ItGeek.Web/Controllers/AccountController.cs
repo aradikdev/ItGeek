@@ -61,7 +61,7 @@ namespace ItGeek.Web.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(1)
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
                 }
             );
         }
@@ -92,6 +92,13 @@ namespace ItGeek.Web.Controllers
                 ModelState.AddModelError("Email", "Пользователь с таким Email уже существует");
             }
             return View(registerViewModel);
+        }
+
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

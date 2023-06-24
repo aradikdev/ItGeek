@@ -13,30 +13,39 @@ namespace ItGeek.Web.Controllers
         {
             _uow = uow;
         }
-        public IActionResult Index()
+        [HttpGet("[Controller]/{categorySlug}")]
+        public async Task<IActionResult> Index(string categorySlug)
 		{
-			return View();
+			Category category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
+			return View(category);
 		}
 
-		//[HttpGet("{categorySlug}/{postSlug}")]
+		[HttpGet("[Controller]/{categorySlug}/{postSlug}")]
 		public async Task<IActionResult> Post(string categorySlug, string postSlug)
         {
-            Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
-            Category category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
-			List<Post> allPosts = await _uow.PostRepository.ListByCategoryIdAsync(category.Id);
-
-			List<PostContent> allPostContent = await _uow.PostContentRepository.ListByCategoryIdAsync(category.Id);
-
-			PostContentViewModel postContent = new PostContentViewModel()
-            {
-                category = category,
-				post = postOne,
-                postContent = await _uow.PostContentRepository.GetByPostIDAsync(postOne.Id),
-                posts = allPosts,
-                postContents = allPostContent
-			};
-
-            return View(postContent);
+			Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlug);
+            ViewBag.Category = await _uow.CategoryRepository.GetBySlugAsync(categorySlug);
+			return View(postOne);
         }
-    }
+		[HttpPost]
+		public async Task<IActionResult> AddComment(Comment comment, string categorySlugOld, string postSlugOld)
+		{
+			comment.CreatedAt = DateTime.Now;
+			if (ModelState.IsValid)
+			{
+				await _uow.CommentRepository.InsertAsync(comment);
+
+				Post postOne = await _uow.PostRepository.GetBySlugAsync(postSlugOld);
+				PostComment postComment = new PostComment()
+				{
+					PostId = postOne.Id,
+					CommentId = comment.Id,
+				};
+				await _uow.PostCommentRepository.InsertAsync(postComment);
+
+			}
+			return RedirectToAction("Post", new { categorySlug = categorySlugOld, postSlug = postSlugOld });
+		}
+		
+	}
 }

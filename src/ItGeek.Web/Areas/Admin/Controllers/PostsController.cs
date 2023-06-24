@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿using ItGeek.BLL;
 using ItGeek.DAL.Entities;
-using ItGeek.BLL;
 using ItGeek.Web.Areas.Admin.ViewModels;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace ItGeek.Web.Areas.Admin.Controllers
 {
@@ -124,7 +117,23 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 				await _uow.PostRepository.InsertAsync(post);
 				await _uow.PostContentRepository.InsertAsync(postContent);
 
-				foreach (int catId in postViewModel.CategoryId)
+                string[] tagsNames = postViewModel.TagIds.Split(new char[] { ',' });
+
+                foreach (string tagName in tagsNames)
+                {
+                    int tagId = await _uow.PostTagRepository.GetTagIdByName(tagName.Trim());
+                    if (tagId != 0)
+                    {
+                        PostTag postTag = new PostTag()
+                        {
+                            PostId = post.Id,
+                            TagId = tagId
+                        };
+                        await _uow.PostTagRepository.InsertAsync(postTag);
+                    }
+                }
+
+                foreach (int catId in postViewModel.CategoryId)
                 {
                     PostCategory postCategory = new PostCategory()
 				    {    
@@ -162,6 +171,7 @@ namespace ItGeek.Web.Areas.Admin.Controllers
             }
             PostContent postContent = await _uow.PostContentRepository.GetByPostIDAsync(id);
             
+            string tagNames = await _uow.PostTagRepository.GetByPostIDAsync(id);
 
             PostViewModel postViewModel = new PostViewModel()
             {
@@ -172,7 +182,11 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                 PostBody = postContent.PostBody,
                 PostImage = postContent.PostImage,
                 CommentsClosed = postContent.CommentsClosed,
+                TagIds = tagNames
             };
+
+
+
 			ViewBag.Authors = await _uow.AuthorRepository.ListAllAsync();
 			ViewBag.Categories = await _uow.CategoryRepository.ListAllAsync();
 			ViewBag.PostCategories = await _uow.PostCategoryRepository.ListByPostIdAsync(id);
@@ -213,6 +227,40 @@ namespace ItGeek.Web.Areas.Admin.Controllers
                     //TODO удалить старую картинку
                 }
                 await _uow.PostContentRepository.UpdateAsync(postContent);
+
+                //qwe
+                string[] tagsNames = postViewModel.TagIds.Split(new char[] { ',' });
+                // [qwe, qweret, qwe]
+
+                await _uow.PostTagRepository.DeleteByPostIdAsync(post.Id);
+                foreach (string tagName in tagsNames)
+                {
+                    Tag tag = await _uow.TagRepository.GetOneTagByNameAsync(tagName);
+                    if(tag != null)
+                    {
+                        PostTag postTag = new PostTag()
+                        {
+                            PostId = post.Id,
+                            TagId = tag.Id
+                        };
+                        await _uow.PostTagRepository.InsertAsync(postTag);
+                    }
+                }
+
+                await _uow.PostAuthorRepository.DeleteByPostIdAsync(post.Id);
+                foreach (int authId in postViewModel.AuthorId)
+                {
+                    Author haveAuthor = await _uow.AuthorRepository.GetByIDAsync(authId);
+                    if (haveAuthor != null)
+                    {
+                        PostAuthor postAuthor = new PostAuthor()
+                        {
+                            PostId = post.Id,
+                            AuthorId = authId
+                        };
+                        await _uow.PostAuthorRepository.InsertAsync(postAuthor);
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -255,5 +303,59 @@ namespace ItGeek.Web.Areas.Admin.Controllers
 
             return Json(res);
         }
+
+        public async Task<IActionResult> GenerateRandomPosts(int count = 1)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Post post = new Post();
+                PostContent content = new PostContent();
+                PostCategory postCat = new PostCategory();
+                PostAuthor postAuthor = new PostAuthor();
+                PostTag postTag = new PostTag();
+                Random random = new Random();
+
+                post.Slug = await GetRandomWords(1); post.CreatedAt = DateTime.Now;
+                //post.CreatedBy = 
+                await _uow.PostRepository.InsertAsync(post);
+
+                content.Title = await GetRandomWords(3);
+                content.PostBody = await GetRandomWords(50);
+                content.PostImage = random.Next(1, 32).ToString() + ".jpg"; 
+                // надо добавить в папку uploads изображения с названием "1.jpg", "2.jpg"  и так далее по порядку. Количество поставить в random.Next (у меня 32)
+                content.PostId = post.Id; 
+
+                postCat.PostId = post.Id;
+                postCat.CategoryId = await _uow.CategoryRepository.RandomCatId();
+
+                postAuthor.PostId = post.Id;
+                postAuthor.AuthorId = await _uow.PostAuthorRepository.RandomAuthorId();
+
+                postTag.PostId = post.Id;
+                postTag.TagId = await _uow.PostTagRepository.RandomTagId();
+
+                await _uow.PostAuthorRepository.InsertAsync(postAuthor);
+                await _uow.PostCategoryRepository.InsertAsync(postCat); 
+                await _uow.PostContentRepository.InsertAsync(content); 
+                await _uow.PostTagRepository.InsertAsync(postTag);
+            }
+            return RedirectToAction("Index");
+        }
+        static async Task<string> GetRandomWords(int count)
+        {
+            string[] words = new string[count]; string space = count > 1 ? " " : "";
+            using (HttpClient client = new HttpClient())
+            {
+                string apiUrl = $"https://random-word-api.herokuapp.com/word?number={count}";
+                HttpResponseMessage response = await client.GetAsync(apiUrl); if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync(); words = JsonSerializer.Deserialize<string[]>(jsonResponse);
+                }
+                else
+                    throw new Exception("Failed to retrieve random words.");
+            }
+            return string.Join(space, words);
+        }
+
     }
 }

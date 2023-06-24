@@ -27,4 +27,19 @@ public class PostAuthorRepository : GenericRepositoryAsync<PostAuthor>, IPostAut
 
 		return result;
 	}
+    public async Task DeleteByPostIdAsync(int postId)
+    {
+        List<PostAuthor> postAuthors = await _db.PostAuthors.Where(x => x.PostId == postId).ToListAsync();
+
+        foreach (PostAuthor item in postAuthors)
+        {
+            _db.PostAuthors.Remove(item);
+            await _db.SaveChangesAsync();
+        }
+    }
+    public async Task<int> RandomAuthorId()
+    {
+        Author? author = await _db.Authors.OrderBy(x => Guid.NewGuid()).FirstOrDefaultAsync(); return author != null ? author.Id : 1;
+    }
+
 }
